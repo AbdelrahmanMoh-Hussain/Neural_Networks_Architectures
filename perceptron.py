@@ -80,4 +80,4 @@ def test_perceptron(x, y, weight_vector, bias, features_list):
     return error
 
 
-percep(['MajorAxisLength', 'roundnes'], ['BOMBAY', 'CALI'], 0.01, 1000, 1)
+# percep(['MajorAxisLength', 'roundnes'], ['BOMBAY', 'CALI'], 0.01, 1000, 1)

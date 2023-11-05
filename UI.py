@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import perceptron
+import Adaline
 
 # Create a Tkinter window
 root = tk.Tk()
@@ -34,11 +36,11 @@ combobox_2.bind("<<ComboboxSelected>>")
 combobox_3.bind("<<ComboboxSelected>>")
 combobox_4.bind("<<ComboboxSelected>>")
 
-eta_label = tk.Label(root, text="Enter learning rate (eta):")
-eta_entry = tk.Entry(root)
+lr_label = tk.Label(root, text="Enter learning rate (eta):")
+lr_entry = tk.Entry(root)
 
-m_label = tk.Label(root, text="Enter number of epochs (m):")
-m_entry = tk.Entry(root)
+m_epochs_label = tk.Label(root, text="Enter number of epochs (m):")
+m_epochs_entry = tk.Entry(root)
 
 mse_threshold_label = tk.Label(root, text="Enter MSE threshold (mse_threshold):")
 mse_threshold_entry = tk.Entry(root)
@@ -68,10 +70,10 @@ combobox_2.grid(row=1, column=1)
 label2.grid(row=2, column=0, columnspan=2)
 combobox_3.grid(row=3, column=0)
 combobox_4.grid(row=3, column=1)
-eta_label.grid(row=4, column=0, columnspan=2)
-eta_entry.grid(row=5, column=0, columnspan=2)
-m_label.grid(row=6, column=0, columnspan=2)
-m_entry.grid(row=7, column=0, columnspan=2)
+lr_label.grid(row=4, column=0, columnspan=2)
+lr_entry.grid(row=5, column=0, columnspan=2)
+m_epochs_label.grid(row=6, column=0, columnspan=2)
+m_epochs_entry.grid(row=7, column=0, columnspan=2)
 mse_threshold_label.grid(row=8, column=0, columnspan=2)
 mse_threshold_entry.grid(row=9, column=0, columnspan=2)
 add_bias_checkbox.grid(row=10, column=0, columnspan=2)
@@ -81,17 +83,27 @@ adaline_radio.grid(row=13, column=0, columnspan=2)
 
 
 def on_button_click():
+    if len(selected_classes) > 0 or len(selected_features) > 0:
+        selected_features.clear()
+        selected_classes.clear()
     selected_features.append(selected_feature_1.get())
     selected_features.append(selected_feature_2.get())
     selected_classes.append(selected_class_1.get())
     selected_classes.append(selected_class_2.get())
-    print(f"Selected features List: {selected_features}")
-    print(f"Selected classes List: {selected_classes}")
-    print(f"eta : {eta_entry.get()}")
-    print(f"m : {m_entry.get()}")
-    print(f"mse : {mse_threshold_entry.get()}")
-    print(f"bias : {add_bias_var.get()}")
-    print(f"algo : {algorithm_var.get()}")
+    # print(f"Selected features List: {selected_features}")
+    # print(f"Selected classes List: {selected_classes}")
+    # print(f"eta : {lr_entry.get()}")
+    # print(f"m : {m_epochs_entry.get()}")
+    # print(f"mse : {mse_threshold_entry.get()}")
+    # print(f"bias : {add_bias_var.get()}")
+    # print(f"algo : {algorithm_var.get()}")
+    # print(type(algorithm_var.get()))
+    if algorithm_var.get() == "Perceptron":
+        perceptron.percep(selected_features, selected_classes, float(lr_entry.get()), int(m_epochs_entry.get()),
+                          int(add_bias_var.get()))
+    elif algorithm_var.get() == "Adaline":
+        Adaline.adaline_function(selected_features, selected_classes, float(lr_entry.get()),
+                                 float(mse_threshold_entry.get()), int(add_bias_var.get()), int(m_epochs_entry.get()))
 
 
 button = tk.Button(root, text="Generate", command=on_button_click)

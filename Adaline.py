@@ -92,4 +92,4 @@ def __test(x, y, weight_vector, bias, features_list):
     return error
 
 
-adaline_function(['Area', 'Perimeter'], ['BOMBAY', 'CALI'], 0.01, 0.05, 0, 1000)
+# adaline_function(['Area', 'Perimeter'], ['BOMBAY', 'CALI'], 0.01, 0.05, 0, 1000)
