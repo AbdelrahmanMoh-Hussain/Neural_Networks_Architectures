@@ -4,17 +4,6 @@ from preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 import seaborn as sns
-import warnings
-import sys
-import io
-warnings_output = io.StringIO()
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-with warnings.catch_warnings(record=True):
-    warnings.simplefilter("always")
-    sys.stderr = warnings_output
-
 def adaline_function(flist, clist, learing_rate, threshold, bias, epoch):
     df = pd.read_excel('Dry_Bean_Dataset.xlsx')
     filtered_df = df[df['Class'].isin(clist)]

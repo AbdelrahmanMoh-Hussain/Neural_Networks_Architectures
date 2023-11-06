@@ -4,16 +4,6 @@ from preprocessing import *
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.model_selection import train_test_split
-import warnings
-import sys
-import io
-warnings_output = io.StringIO()
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=UserWarning)
-with warnings.catch_warnings(record=True):
-    warnings.simplefilter("always")
-    sys.stderr = warnings_output
 
 def percep(flist, clist, lr, nm, b):
     df = pd.read_excel('Dry_Bean_Dataset.xlsx')
