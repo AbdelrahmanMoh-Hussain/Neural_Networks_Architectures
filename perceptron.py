@@ -2,14 +2,25 @@ import numpy as np
 import pandas as pd
 from preprocessing import *
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.model_selection import train_test_split
-
+import warnings
+import sys
+import io
+warnings_output = io.StringIO()
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+with warnings.catch_warnings(record=True):
+    warnings.simplefilter("always")
+    sys.stderr = warnings_output
 
 def percep(flist, clist, lr, nm, b):
     df = pd.read_excel('Dry_Bean_Dataset.xlsx')
     filtered_df = df[df['Class'].isin(clist)]
     y = filtered_df['Class']
     x = filtered_df[flist]
+    x = clean_num(x, flist)
     x = normalize(x, flist)
     categories = clist
     label_mapping = {category: label for label, category in enumerate(categories)}
@@ -20,13 +31,13 @@ def percep(flist, clist, lr, nm, b):
         weight_vector = np.random.rand(3) * 0.01
     else:
         weight_vector = np.random.rand(2) * 0.01
-    print(weight_vector)
+
     x_arr = x.to_numpy()
     y_arr = y.to_numpy()
     X_train, X_test, y_train, y_test = train_test_split(x_arr, y_arr, test_size=40, stratify=y, random_state=42)
     weight_vector = train_perceptron(X_train, y_train, nm, lr, weight_vector)
-    er = test_perceptron(X_test, y_test, weight_vector, b, flist)
-    print(er)
+    accuracy = (1 - (test_perceptron(X_test, y_test, weight_vector, b, flist) / len(y_test))) * 100
+    print("Pereptron Accuracy: ", accuracy, " %")
 
 
 def train_perceptron(x, y, epoch, learning_rate, weight_vector):
@@ -50,11 +61,39 @@ def train_perceptron(x, y, epoch, learning_rate, weight_vector):
 def test_perceptron(x, y, weight_vector, bias, features_list):
     samples = x.shape[0]
     error = 0
+    t = 0
+    f = 0
+    tp = 0
+    fp = 0
+    tn = 0
+    fn = 0
     for i in range(samples):
         xi = x[i]
         yi = np.sign(np.dot(weight_vector, xi))
+        if y[i]==1:
+            t+=1
+            if yi==y[i]:
+                tp+=1
+            else:
+                fn+=1
+        else:
+            f+=1
+            if yi==y[i]:
+                tn+=1
+            else:
+                fp+=1
         if yi != y[i]:
             error += 1
+    confusion_matrix = [[tn, fp], [fn, tp]]
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues',
+                xticklabels=['Predicted Negative', 'Predicted Positive'],
+                yticklabels=['Actual Negative', 'Actual Positive'])
+
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
     if bias == 1:
         feature1 = x[:, 1]
         feature2 = x[:, 2]
@@ -80,4 +119,4 @@ def test_perceptron(x, y, weight_vector, bias, features_list):
     return error
 
 
-# percep(['MajorAxisLength', 'roundnes'], ['BOMBAY', 'CALI'], 0.01, 1000, 1)
+# percep(['MajorAxisLength', 'roundnes'], ['BOMBAY', 'CALI'], 0.01, 2000, 1)

@@ -3,7 +3,17 @@ import pandas as pd
 from preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-
+import seaborn as sns
+import warnings
+import sys
+import io
+warnings_output = io.StringIO()
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
+with warnings.catch_warnings(record=True):
+    warnings.simplefilter("always")
+    sys.stderr = warnings_output
 
 def adaline_function(flist, clist, learing_rate, threshold, bias, epoch):
     df = pd.read_excel('Dry_Bean_Dataset.xlsx')
@@ -11,8 +21,9 @@ def adaline_function(flist, clist, learing_rate, threshold, bias, epoch):
 
     y = filtered_df['Class']
     x = filtered_df[flist]
+    x = clean_num(x, flist)
     x = normalize(x, flist)
-    # x = clean_num(flist, x)
+
 
     categories = clist
     label_mapping = {category: label for label, category in enumerate(categories)}
@@ -24,7 +35,7 @@ def adaline_function(flist, clist, learing_rate, threshold, bias, epoch):
         weight_vector = np.random.rand(3) * 0.01
     else:
         weight_vector = np.random.rand(2) * 0.01
-    print("weight vector" + str(weight_vector))
+
 
     x_arr = x.to_numpy()
     y_arr = y.to_numpy()
@@ -33,8 +44,8 @@ def adaline_function(flist, clist, learing_rate, threshold, bias, epoch):
     X_train, X_test, y_train, y_test = train_test_split(x_arr, y_arr, test_size=40, stratify=y, random_state=42)
 
     weight_vector = __train(X_train, y_train, threshold, learing_rate, weight_vector, epoch)
-    er = __test(X_test, y_test, weight_vector, bias, flist)
-    print(er)
+    accuracy = (1-(__test(X_test, y_test, weight_vector, bias, flist)/len(y_test)))*100
+    print("Adaline Accuracy: ",accuracy," %")
 
 
 def __train(x, y, threshold, learning_rate, weight_vector, epoch):
@@ -49,7 +60,6 @@ def __train(x, y, threshold, learning_rate, weight_vector, epoch):
             summation += pow(loss, 2) / 2
 
         mean_square_error = summation / samples
-        print(mean_square_error)
         if mean_square_error < threshold:
             break
 
@@ -59,14 +69,42 @@ def __train(x, y, threshold, learning_rate, weight_vector, epoch):
 def __test(x, y, weight_vector, bias, features_list):
     samples = x.shape[0]
     error = 0
+    t=0
+    f=0
+    tp=0
+    fp=0
+    tn=0
+    fn=0
     for i in range(samples):
+
         xi = x[i]
-        yi = np.dot(weight_vector, xi)
+        yi = np.sign(np.dot(weight_vector, xi))
+        if y[i]==1:
+            t+=1
+            if yi==y[i]:
+                tp+=1
+            else:
+                fn+=1
+        else:
+            f+=1
+            if yi==y[i]:
+                tn+=1
+            else:
+                fp+=1
+
         if yi != y[i]:
             error += 1
 
-    print(error)
+    confusion_matrix = [[tn, fp], [fn, tp]]
+    plt.figure(figsize=(6, 4))
+    sns.heatmap(confusion_matrix, annot=True, fmt='d', cmap='Blues',
+                xticklabels=['Predicted Negative', 'Predicted Positive'],
+                yticklabels=['Actual Negative', 'Actual Positive'])
 
+    plt.xlabel('Predicted')
+    plt.ylabel('Actual')
+    plt.title('Confusion Matrix')
+    plt.show()
     if bias == 1:
         feature1 = x[:, 1]
         feature2 = x[:, 2]

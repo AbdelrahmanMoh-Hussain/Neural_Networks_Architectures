@@ -4,10 +4,12 @@ import pandas as pd
 import matplotlib as plt
 
 
-def clean_num(column_names, data):
+def clean_num(x, column_names):
     for col in column_names:
-        median = data[col].median()
-        data[col].fillna(median, inplace=True)
+        median = x[col].median()
+        x[col].fillna(median, inplace=True)
+    return x
+
 
 
 def normalize(x, column_names):
