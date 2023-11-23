@@ -34,11 +34,13 @@ def train(neurons_count,layers_count,weights,biases,x,y,epoch):
     for e in range(epoch):
         for i in range(samples):
             z=forward(weights,biases,x[i])
-            # print(z)
+            #print(z)
+            backward(weights,biases,layers_count,neurons_count,epoch,0,z,x[i],y[i])
             break
         break
 
-def forward(weights,biases,sample):
+
+def forward(weights, biases, sample):
     z=[]
     for i in range(len(weights)):
         z.append([])
@@ -50,4 +52,35 @@ def forward(weights,biases,sample):
             sig=1 / (1 + np.exp(-net))
             z[i].append(sig)
     return z
+
+def backward(weights, biases, layers_count, neurons_count,epochs ,activation_function,z,x,y):
+
+    for layer in reversed(range(0,layers_count)):
+        print("Layers:# " + str(layer))
+        print("Num of neurons:# " + str(neurons_count[layer]))
+        new_error = []
+
+        for neuron in range(0,neurons_count[layer]):
+            if(layer == layers_count - 1): #1st case: hidden to Output [[ (d-y)*f`(net) ]]
+                print("Neuron:# " + str(neuron))
+                print("Y =" + str(y[neuron]))
+                print("Z =" + str(z[layer - 1][neuron]))
+
+                print((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
+                new_error.append((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
+            else: #1st case: [[ f`(net) * sum(error[k]*weight[k][j] ]]
+                derivative_func = derivative(z[layer - 1][neuron], activation_function)
+                summation = 0
+                for k in range(neuron):
+                    print("W = " + str(weights[layer][k][neuron]))
+                    print("E = " + str(error[k]))
+                    summation += error[k]*weights[k][layer]
+                new_error.append(derivative_func * summation)
+            #print(z[layer-1][neuron])
+        error = new_error
+
+
+def derivative(value, activation_function):
+    return value * (1 - value)
+
 propagation(2,[3,4],0.1,1000,1,1)
