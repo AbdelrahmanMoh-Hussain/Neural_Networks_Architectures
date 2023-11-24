@@ -29,13 +29,14 @@ def propagation(number_of_hidden_layers, number_of_neurons,learing_rate, epochs,
     y_arr = y.to_numpy()
     X_train, X_test, y_train, y_test = train_test_split(x_arr, y_arr, test_size=40, stratify=y, random_state=42)
     train(neurons_count, num_layers, weights, biases, X_train, y_train, epochs)
+
 def train(neurons_count,layers_count,weights,biases,x,y,epoch):
     samples = x.shape[0]
     for e in range(epoch):
         for i in range(samples):
             z=forward(weights,biases,x[i])
             #print(z)
-            backward(weights,biases,layers_count,neurons_count,epoch,0,z,x[i],y[i])
+            backward(weights,biases,layers_count,neurons_count,epoch,0,z,x[i],y[i], 5)
             break
         break
 
@@ -53,37 +54,26 @@ def forward(weights, biases, sample):
             z[i].append(sig)
     return z
 
-def backward(weights, biases, layers_count, neurons_count,epochs ,activation_function,z,x,y):
-
+def backward(weights, biases, layers_count, neurons_count,epochs ,activation_function,z,x,y, learning_rate):
     error = [[] for i in range(layers_count)]
     for layer in reversed(range(0,layers_count)):
-        print("Layers:# " + str(layer))
-        print("Num of neurons:# " + str(neurons_count[layer]))
-
-
         for neuron in range(0,neurons_count[layer]):
             if(layer == layers_count - 1): #1st case: hidden to Output [[ (d-y)*f`(net) ]]
-                print("Neuron:# " + str(neuron))
-                print("Y =" + str(y[neuron]))
-                print("Z =" + str(z[layer - 1][neuron]))
-
-                print((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
                 error[layer].append((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
+
             elif layer == 0: #update weights
-                print("Update Here")
+                for i in range(5):
+                    for k in range(0,neurons_count[layer + 1]):
+                        weights[layer][k][i] += learning_rate * error[layer + 1][k] * x[i]
 
             else: #1st case: [[ f`(net) * sum(error[k]*weight[k][j] ]]
                 derivative_func = derivative(z[layer - 1][neuron], activation_function)
                 summation = 0
-                #weights_error = error[layer + 1] * weights[layer]
-                for k in range(neuron):
-                    print("W = " + str(weights[layer][k][k]))
-                    print("E = " + str(error[layer + 1][k]))
-                    summation += error[layer + 1][k] * weights[layer][k][k]
+                for k in range(0,neurons_count[layer + 1]):
+                    summation += error[layer + 1][k] * weights[layer][k][neuron]
                 error[layer].append(derivative_func * summation)
-            print(error)
-        print(weights)
-            #print(z[layer-1][neuron])
+
+    #forward(weights, biases, x)
 
 
 def derivative(value, activation_function):
