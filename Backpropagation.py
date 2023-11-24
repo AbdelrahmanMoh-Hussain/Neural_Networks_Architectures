@@ -55,10 +55,11 @@ def forward(weights, biases, sample):
 
 def backward(weights, biases, layers_count, neurons_count,epochs ,activation_function,z,x,y):
 
+    error = [[] for i in range(layers_count)]
     for layer in reversed(range(0,layers_count)):
         print("Layers:# " + str(layer))
         print("Num of neurons:# " + str(neurons_count[layer]))
-        new_error = []
+
 
         for neuron in range(0,neurons_count[layer]):
             if(layer == layers_count - 1): #1st case: hidden to Output [[ (d-y)*f`(net) ]]
@@ -67,17 +68,22 @@ def backward(weights, biases, layers_count, neurons_count,epochs ,activation_fun
                 print("Z =" + str(z[layer - 1][neuron]))
 
                 print((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
-                new_error.append((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
+                error[layer].append((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
+            elif layer == 0: #update weights
+                print("Update Here")
+
             else: #1st case: [[ f`(net) * sum(error[k]*weight[k][j] ]]
                 derivative_func = derivative(z[layer - 1][neuron], activation_function)
                 summation = 0
+                #weights_error = error[layer + 1] * weights[layer]
                 for k in range(neuron):
-                    print("W = " + str(weights[layer][k][neuron]))
-                    print("E = " + str(error[k]))
-                    summation += error[k]*weights[k][layer]
-                new_error.append(derivative_func * summation)
+                    print("W = " + str(weights[layer][k][k]))
+                    print("E = " + str(error[layer + 1][k]))
+                    summation += error[layer + 1][k] * weights[layer][k][k]
+                error[layer].append(derivative_func * summation)
+            print(error)
+        print(weights)
             #print(z[layer-1][neuron])
-        error = new_error
 
 
 def derivative(value, activation_function):
