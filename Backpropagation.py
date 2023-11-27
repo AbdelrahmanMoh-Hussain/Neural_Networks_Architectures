@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import math
 from preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -91,6 +92,9 @@ def update_weights(weights_list, error_list, learning_rate, neurons_count,z,x):
                     weights_list[layer_index][k][i] += learning_rate * error_list[layer_index + 1][k] * z[layer_index - 1][i]
         print(weights_list)
 def derivative(value, activation_function):
-    return value * (1 - value)
+    if activation_function == 0:
+        return value * (1 - value)
+    else:
+        return 1 - pow(math.tanh(value),2)
 
 propagation(2,[3,4],0.1,1000,1,1)
