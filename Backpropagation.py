@@ -62,9 +62,8 @@ def backward(weights, biases, layers_count, neurons_count,epochs ,activation_fun
                 error[layer].append((y[neuron] - z[layer - 1][neuron]) * derivative(z[layer - 1][neuron], activation_function))
 
             elif layer == 0: #update weights
-                for i in range(5):
-                    for k in range(0,neurons_count[layer + 1]):
-                        weights[layer][k][i] += learning_rate * error[layer + 1][k] * x[i]
+                update_weights(weights, error, learning_rate, neurons_count, z, x)
+                break
 
             else: #1st case: [[ f`(net) * sum(error[k]*weight[k][j] ]]
                 derivative_func = derivative(z[layer - 1][neuron], activation_function)
@@ -75,7 +74,22 @@ def backward(weights, biases, layers_count, neurons_count,epochs ,activation_fun
 
     #forward(weights, biases, x)
 
-
+def update_weights(weights_list, error_list, learning_rate, neurons_count,z,x):
+    print("Before")
+    print(weights_list)
+    print(z)
+    for layer_index in range(0, 3):
+        print("Layer # " + str(layer_index))
+        for i in range(neurons_count[layer_index]):
+            print("i = " + str(i))
+            for k in range(0, neurons_count[layer_index + 1]):
+                print("K = " + str(k))
+                if layer_index == 0:
+                    print("HERE X = " + str(x[i]))
+                    weights_list[layer_index][k][i] += learning_rate * error_list[layer_index + 1][k] * x[i]
+                else:
+                    weights_list[layer_index][k][i] += learning_rate * error_list[layer_index + 1][k] * z[layer_index - 1][i]
+        print(weights_list)
 def derivative(value, activation_function):
     return value * (1 - value)
 
