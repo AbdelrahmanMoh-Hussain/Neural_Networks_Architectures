@@ -147,4 +147,4 @@ def activation_fun(value, activation_function):
     else:
         return math.tanh(value)
 
-propagation(1,[3],0.01,1000,1,0)#sigmoid test
+# propagation(1,[3],0.01,1000,1,0)#sigmoid test
