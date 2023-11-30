@@ -14,42 +14,34 @@ def propagation(number_of_hidden_layers, number_of_neurons,learing_rate, epochs,
     x = normalize(x, flist)
     mapping = {'BOMBAY': [1, 0, 0], 'CALI': [0, 1, 0], 'SIRA': [0, 0, 1]}
     y = y.map(mapping)
-    # print(y)
     num_layers = number_of_hidden_layers+2
     neurons_count=[5]
     for i in number_of_neurons:
         neurons_count.append(i)
     neurons_count.append(3)
-    # print(neurons_count)
-    weights = [np.random.randn(neurons_count[i+1], neurons_count[i])*0.01 for i in range(num_layers - 1)]
+    weights = [np.random.randn(neurons_count[i+1], neurons_count[i])*0.001 for i in range(num_layers - 1)]
+
     if(bias):
-        biases = [np.random.randn(1, neurons_count[i + 1])*0.01 for i in range(num_layers - 1)]
+        biases = [np.random.randn(1, neurons_count[i + 1])*0.001 for i in range(num_layers - 1)]
     else:
         biases = [np.random.randn(1, neurons_count[i + 1]) * 0.0 for i in range(num_layers - 1)]
-    # print(weights[0][0]) first dimension is for the layer weights[0] will get the weights for all neurons in this layer
-    # weights[0][0] gets the weights for the first neuron in first layer
-    # print(biases[0][0][1]) first dimension for layer, second is constant with 0 always, third for neuron
+
     x_arr = x.to_numpy()
     y_arr = y.to_numpy()
-    print(weights)
-    print(biases)
     X_train, X_test, y_train, y_test = train_test_split(x_arr, y_arr, test_size=60, stratify=y, random_state=42)
-
-    new_weights,new_biases=train(neurons_count, num_layers, weights, biases, X_train, y_train, epochs,function)
-    print(new_weights)
-    print(new_biases)
+    new_weights,new_biases=train(neurons_count, num_layers, weights, biases, X_train, y_train, epochs,function,learing_rate)
     test(new_weights,new_biases,X_test,y_test,function)
 
 
-def train(neurons_count,layers_count,weights,biases,x,y,epoch,function):
+def train(neurons_count,layers_count,weights,biases,x,y,epoch,function,learing_rate):
     samples = x.shape[0]
     for e in range(epoch):
         error =0
         for i in range(samples):
             z=forward(weights,biases,x[i],function)
-            weights,biases=backward(weights,biases,layers_count,neurons_count,epoch,0,z,x[i],y[i], 5)
+            weights,biases=backward(weights,biases,layers_count,neurons_count,epoch,function,z,x[i],y[i],learing_rate )
             res = z[-1]
-            max = -10000000
+            max=z[-1][0]
             for j in z[-1]:
                 if j > max:
                     max = j
@@ -65,12 +57,11 @@ def train(neurons_count,layers_count,weights,biases,x,y,epoch,function):
     return weights,biases
 def test(weights,biases,x,y,function):
     samples = x.shape[0]
-    print(samples)
     error=0
     for i in range(samples):
         z=forward(weights,biases,x[i],function)
         res=z[-1]
-        max=-10000000
+        max=z[-1][0]
         for j in z[-1]:
             if j>max:
                 max=j
@@ -95,6 +86,7 @@ def forward(weights, biases, sample,fun):
                 net = np.dot(weights[i][j], z[i-1]) + biases[i][0][j]
             net=activation_fun(net,fun)
             z[i].append(net)
+
     return z
 
 def backward(weights, biases, layers_count, neurons_count,epochs ,activation_function,z,x,y, learning_rate):
@@ -114,20 +106,13 @@ def backward(weights, biases, layers_count, neurons_count,epochs ,activation_fun
                     summation += error[layer + 1][k] * weights[layer][k][neuron]
                 error[layer].append(derivative_func * summation)
     return new_weights,new_biases
-    #forward(weights, biases, x)
+
 
 def update_weights(weights_list,biases, error_list, learning_rate, neurons_count,z,x):
-    # print("Before")
-    # print(weights_list)
-    # print(z)
     for layer_index in range(0, len(neurons_count)-1):
-        # print("Layer # " + str(layer_index))
         for i in range(neurons_count[layer_index]):
-            # print("i = " + str(i))
             for k in range(0, neurons_count[layer_index + 1]):
-                # print("K = " + str(k))
                 if layer_index == 0:
-                    # print("HERE X = " + str(x[i]))
                     weights_list[layer_index][k][i] += learning_rate * error_list[layer_index + 1][k] * x[i]
                     if biases[layer_index][0][k]!=0:
                         biases[layer_index][0][k]+=learning_rate * error_list[layer_index + 1][k]
@@ -147,4 +132,3 @@ def activation_fun(value, activation_function):
     else:
         return math.tanh(value)
 
-# propagation(1,[3],0.01,1000,1,0)#sigmoid test
