@@ -1,6 +1,9 @@
 import numpy as np
 import pandas as pd
 import math
+
+from sklearn.metrics import confusion_matrix
+
 from preprocessing import *
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
@@ -58,6 +61,7 @@ def train(neurons_count,layers_count,weights,biases,x,y,epoch,function,learing_r
 def test(weights,biases,x,y,function):
     samples = x.shape[0]
     error=0
+    y_list=[]
     for i in range(samples):
         z=forward(weights,biases,x[i],function)
         res=z[-1]
@@ -73,7 +77,10 @@ def test(weights,biases,x,y,function):
             y_pred = [0, 0, 1]
         if y_pred!=y[i]:
             error+=1
+        y_list.append(y_pred)
+
     print("Test Accuracy : ",((samples-error)/samples)*100," %")
+    confusion_matrixx(y_list,y)
 
 def forward(weights, biases, sample,fun):
     z=[]
@@ -131,4 +138,72 @@ def activation_fun(value, activation_function):
         return 1 / (1 + np.exp(-value))
     else:
         return math.tanh(value)
+def confusion_matrixx(y_pred, y_true):
+    tp1=0
+    tp2=0
+    tp3=0
+    pre2_1=0
+    pre1_2=0
+    pre3_2=0
+    pre3_1=0
+    pre1_3=0
+    pre2_3=0
+
+    i=0
+    y_p=[]
+    y_t=[]
+    while(i<len(y_pred)):
+        if(y_true[i]==[1,0,0]):
+            y_t.append(1)
+        if (y_true[i] == [0, 1, 0]):
+            y_t.append(2)
+        if (y_true[i] == [0, 0, 1]):
+            y_t.append(3)
+        if (y_pred[i] == [1, 0, 0]):
+            y_p.append(1)
+        if (y_pred[i] == [0, 1, 0]):
+            y_p.append(2)
+        if (y_pred[i] == [0, 0, 1]):
+            y_p.append(3)
+        if y_pred[i]==y_true[i] and y_true[i]==[1,0,0]:
+            tp1+=1
+        elif y_pred[i]==y_true[i]and y_true[i]==[0,1,0]:
+            tp2+=1
+        elif y_pred[i]==y_true[i]and y_true[i]==[0,0,1]:
+            tp3+=1
+        elif y_pred[i]!=y_true[i]and y_true[i]==[1,0,0]:
+
+            if y_pred[i]==[0,1,0]:
+                pre2_1+=1
+            else:
+                pre3_1 += 1
+
+        elif y_pred[i]!=y_true[i]and y_true[i]==[0,1,0]:
+            if y_pred[i]==[1,0,0]:
+               pre1_2+=1
+            else:
+                pre3_2 += 1
+
+        elif y_pred[i]!=y_true[i]and y_true[i]==[0,0,1]:
+            if y_pred[i]==[1,0,0]:
+                pre1_3+=1
+            else:
+                pre2_3 += 1
+
+        i+=1
+
+    print(f"{'':<15}{'Predicted A':<15}{'Predicted B':<15}{'Predicted C':<15}")
+    print(f"{'Actual A':<15}{tp1:<15}{pre2_1:<15}{pre3_1:<15}")
+    print(f"{'Actual B':<15}{pre1_2:<15}{tp2:<15}{pre3_2:<15}")
+    print(f"{'Actual C':<15}{pre1_3:<15}{pre2_3:<15}{tp3:<15}")
+
+    cm = confusion_matrix(y_t, y_p)
+    class_labels = ["BOMBAY", "CALI", "SIRA"]
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    plt.title('Confusion Matrix')
+    plt.show()
+
+
 
