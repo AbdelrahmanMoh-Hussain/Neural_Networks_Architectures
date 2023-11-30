@@ -37,25 +37,40 @@ def propagation(number_of_hidden_layers, number_of_neurons,learing_rate, epochs,
 
 
 def train(neurons_count,layers_count,weights,biases,x,y,epoch,function,learing_rate):
+    stop=0.0001
+    flag=1
     samples = x.shape[0]
+
     for e in range(epoch):
         error =0
-        for i in range(samples):
-            z=forward(weights,biases,x[i],function)
-            weights,biases=backward(weights,biases,layers_count,neurons_count,epoch,function,z,x[i],y[i],learing_rate )
-            res = z[-1]
-            max=z[-1][0]
-            for j in z[-1]:
-                if j > max:
-                    max = j
-            if max == res[0]:
-                y_pred = [1, 0, 0]
-            elif max == res[1]:
-                y_pred = [0, 1, 0]
-            else:
-                y_pred = [0, 0, 1]
-            if y_pred != y[i]:
-                error += 1
+        if flag==1:
+
+            for i in range(samples):
+
+                z=forward(weights,biases,x[i],function)
+                res=0
+                for j in range(0,3):
+                    res+=math.pow((z[-1][j]-y[i][j]),2)
+                if res<stop:
+                    print("Error Threshold Reached")
+                    flag=0
+                    break
+
+
+                weights,biases=backward(weights,biases,layers_count,neurons_count,epoch,function,z,x[i],y[i],learing_rate )
+                res = z[-1]
+                max=z[-1][0]
+                for j in z[-1]:
+                    if j > max:
+                        max = j
+                if max == res[0]:
+                    y_pred = [1, 0, 0]
+                elif max == res[1]:
+                    y_pred = [0, 1, 0]
+                else:
+                    y_pred = [0, 0, 1]
+                if y_pred != y[i]:
+                    error += 1
     print("Train Accuracy : ",((samples-error)/samples)*100," %")
     return weights,biases
 def test(weights,biases,x,y,function):
@@ -192,10 +207,10 @@ def confusion_matrixx(y_pred, y_true):
 
         i+=1
 
-    print(f"{'':<15}{'Predicted A':<15}{'Predicted B':<15}{'Predicted C':<15}")
-    print(f"{'Actual A':<15}{tp1:<15}{pre2_1:<15}{pre3_1:<15}")
-    print(f"{'Actual B':<15}{pre1_2:<15}{tp2:<15}{pre3_2:<15}")
-    print(f"{'Actual C':<15}{pre1_3:<15}{pre2_3:<15}{tp3:<15}")
+    print(f"{'':<15}{'Predicted Bombay':<20}{'Predicted Cali':<20}{'Predicted Sira':<20}")
+    print(f"{'Actual Bombay':<20}{tp1:<20}{pre2_1:<20}{pre3_1:<20}")
+    print(f"{'Actual Cali':<20}{pre1_2:<20}{tp2:<20}{pre3_2:<20}")
+    print(f"{'Actual Sira':<20}{pre1_3:<20}{pre2_3:<20}{tp3:<20}")
 
     cm = confusion_matrix(y_t, y_p)
     class_labels = ["BOMBAY", "CALI", "SIRA"]
